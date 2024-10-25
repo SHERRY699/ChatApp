@@ -6,10 +6,11 @@ import {
 } from "react-native-responsive-screen";
 import Feather from "@expo/vector-icons/Feather";
 import AntDesign from "@expo/vector-icons/AntDesign";
-import { Colors } from "../../constants/Colors";
+import { Colors } from "../constants/Colors";
 import { useRouter } from "expo-router";
+import Fontisto from "@expo/vector-icons/Fontisto";
 
-export default function Register() {
+export default function SignUp() {
   const router = useRouter();
 
   return (
@@ -24,7 +25,7 @@ export default function Register() {
         }}
       >
         <Image
-          source={require("../../assets/images/register.png")}
+          source={require("../assets/images/register.png")}
           style={{ height: 300, width: 300 }}
         />
       </View>
@@ -35,12 +36,8 @@ export default function Register() {
           <TextInput placeholder="Username" style={{ color: "gray" }} />
         </View>
         <View style={styles.input}>
-          <Feather name="lock" size={24} color="gray" />
-          <TextInput
-            placeholder="Password"
-            style={{ color: "gray" }}
-            secureTextEntry={true}
-          />
+          <Fontisto name="email" size={24} color="gray" />
+          <TextInput placeholder="Email Address" style={{ color: "gray" }} />
         </View>
         <View style={styles.input}>
           <Feather name="lock" size={24} color="gray" />
