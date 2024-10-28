@@ -1,4 +1,12 @@
-import { View, Text, Image, StyleSheet, Pressable } from "react-native";
+import {
+  View,
+  Text,
+  Image,
+  StyleSheet,
+  Pressable,
+  Alert,
+  ToastAndroid,
+} from "react-native";
 import { TextInput } from "react-native-gesture-handler";
 import {
   widthPercentageToDP as wp,
@@ -9,9 +17,32 @@ import AntDesign from "@expo/vector-icons/AntDesign";
 import { Colors } from "../constants/Colors";
 import { useRouter } from "expo-router";
 import Fontisto from "@expo/vector-icons/Fontisto";
+import { useState } from "react";
+import { createUserWithEmailAndPassword } from "firebase/auth";
+import { auth } from "../firebase/fireBaseConfig";
 
 export default function SignUp() {
   const router = useRouter();
+  const [Email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+
+  const handleSignUp = async () => {
+    createUserWithEmailAndPassword(auth, Email, password)
+      .then((userCredential) => {
+        // Signed up
+        const user = userCredential.user;
+        ToastAndroid.show("User Registered", ToastAndroid.BOTTOM);
+        setEmail("");
+        setPassword("");
+        router.push("/Signin");
+        console.log(user);
+      })
+      .catch((error) => {
+        const errorCode = error.code;
+        const errorMessage = error.message;
+        Alert.alert(errorMessage);
+      });
+  };
 
   return (
     <View style={{ flex: 1, paddingTop: 40 }}>
@@ -32,12 +63,15 @@ export default function SignUp() {
       <View style={styles.container}>
         <Text style={{ fontFamily: "outfit-bold", fontSize: 30 }}>Sign Up</Text>
         <View style={styles.input}>
-          <AntDesign name="user" size={24} color="gray" />
-          <TextInput placeholder="Username" style={{ color: "gray" }} />
-        </View>
-        <View style={styles.input}>
           <Fontisto name="email" size={24} color="gray" />
-          <TextInput placeholder="Email Address" style={{ color: "gray" }} />
+          <TextInput
+            placeholder="Email Address"
+            style={{ color: "gray" }}
+            value={Email}
+            onChangeText={(value) => {
+              setEmail(value);
+            }}
+          />
         </View>
         <View style={styles.input}>
           <Feather name="lock" size={24} color="gray" />
@@ -45,10 +79,14 @@ export default function SignUp() {
             placeholder="Password"
             style={{ color: "gray" }}
             secureTextEntry={true}
+            value={password}
+            onChangeText={(value) => {
+              setPassword(value);
+            }}
           />
         </View>
 
-        <Pressable style={styles.btn}>
+        <Pressable onPress={handleSignUp} style={styles.btn}>
           <Text
             style={{
               textAlign: "center",
