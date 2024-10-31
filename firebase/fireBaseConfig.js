@@ -1,7 +1,9 @@
-import { initializeApp } from "firebase/app";
+import { initializeApp, getApp, getApps } from "firebase/app"; // Update imports
 import { initializeAuth, getReactNativePersistence } from "firebase/auth";
 import ReactNativeAsyncStorage from "@react-native-async-storage/async-storage";
+import { getFirestore } from "firebase/firestore";
 
+// Firebase configuration object
 const firebaseConfig = {
   apiKey: "AIzaSyD_K62q91CRHTJ2OJ29LTcdB7Z6UC0rX1A",
   authDomain: "chat-app-df0ab.firebaseapp.com",
@@ -12,7 +14,13 @@ const firebaseConfig = {
   measurementId: "G-2TX5YHP9HN",
 };
 
-const app = initializeApp(firebaseConfig);
+// Initialize Firebase App
+const app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApp();
+
+// Initialize Firebase Authentication with persistence
 export const auth = initializeAuth(app, {
   persistence: getReactNativePersistence(ReactNativeAsyncStorage),
 });
+
+// Initialize Firestore
+export const db = getFirestore(app);

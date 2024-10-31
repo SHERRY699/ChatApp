@@ -1,4 +1,11 @@
-import { View, Text, Image, StyleSheet, Pressable } from "react-native";
+import {
+  View,
+  Text,
+  Image,
+  StyleSheet,
+  Pressable,
+  ToastAndroid,
+} from "react-native";
 import { TextInput } from "react-native-gesture-handler";
 import {
   widthPercentageToDP as wp,
@@ -8,9 +15,33 @@ import Fontisto from "@expo/vector-icons/Fontisto";
 import Feather from "@expo/vector-icons/Feather";
 import { Colors } from "../constants/Colors";
 import { useRouter } from "expo-router";
+import { useState } from "react";
+import { signInWithEmailAndPassword } from "firebase/auth";
+import { auth } from "../firebase/fireBaseConfig";
 
 export default function SignIn() {
   const router = useRouter();
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+
+  const handleSignIn = () => {
+    signInWithEmailAndPassword(auth, email, password)
+      .then((userCredential) => {
+        // Signed in
+        const user = userCredential.user;
+        ToastAndroid.show("Login SuccessFull ", ToastAndroid.BOTTOM);
+        router.push("/Home");
+        console.log(user);
+        // ...
+      })
+      .catch((error) => {
+        const errorCode = error.code;
+        const errorMessage = error.message;
+        console.log(errorMessage);
+        ToastAndroid.show(errorMessage, ToastAndroid.BOTTOM);
+      });
+  };
+
   return (
     <View style={{ flex: 1, paddingTop: 40 }}>
       {/* Image */}
@@ -32,7 +63,14 @@ export default function SignIn() {
         <Text style={{ fontFamily: "outfit-bold", fontSize: 30 }}>Sign In</Text>
         <View style={styles.input}>
           <Fontisto name="email" size={24} color="gray" />
-          <TextInput placeholder="Email Address" style={{ color: "gray" }} />
+          <TextInput
+            onChangeText={(value) => {
+              setEmail(value);
+            }}
+            value={email}
+            placeholder="Email Address"
+            style={{ color: "gray" }}
+          />
         </View>
         <View style={styles.input}>
           <Feather name="lock" size={24} color="gray" />
@@ -40,10 +78,14 @@ export default function SignIn() {
             placeholder="Password"
             style={{ color: "gray" }}
             secureTextEntry={true}
+            onChangeText={(value) => {
+              setPassword(value);
+            }}
+            value={password}
           />
         </View>
         <Text style={{ textAlign: "right" }}>Forgot Password?</Text>
-        <Pressable style={styles.btn}>
+        <Pressable onPress={handleSignIn} style={styles.btn}>
           <Text
             style={{
               textAlign: "center",

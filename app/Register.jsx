@@ -1,3 +1,4 @@
+import React, { useState } from "react";
 import {
   View,
   Text,
@@ -6,6 +7,7 @@ import {
   Pressable,
   Alert,
   ToastAndroid,
+  ActivityIndicator,
 } from "react-native";
 import { TextInput } from "react-native-gesture-handler";
 import {
@@ -13,35 +15,54 @@ import {
   heightPercentageToDP as hp,
 } from "react-native-responsive-screen";
 import Feather from "@expo/vector-icons/Feather";
-import AntDesign from "@expo/vector-icons/AntDesign";
+import Fontisto from "@expo/vector-icons/Fontisto";
 import { Colors } from "../constants/Colors";
 import { useRouter } from "expo-router";
-import Fontisto from "@expo/vector-icons/Fontisto";
-import { useState } from "react";
 import { createUserWithEmailAndPassword } from "firebase/auth";
-import { auth } from "../firebase/fireBaseConfig";
+import { auth } from "../firebase/fireBaseConfig"; // Ensure this is your correct Firebase configuration file
+import { getFirestore, doc, setDoc } from "firebase/firestore"; // Import Firestore functions
+
+const db = getFirestore(); // Initialize Firestore
 
 export default function SignUp() {
   const router = useRouter();
   const [Email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [loading, setLoading] = useState(false);
 
   const handleSignUp = async () => {
-    createUserWithEmailAndPassword(auth, Email, password)
-      .then((userCredential) => {
-        // Signed up
-        const user = userCredential.user;
-        ToastAndroid.show("User Registered", ToastAndroid.BOTTOM);
-        setEmail("");
-        setPassword("");
-        router.push("/Signin");
-        console.log(user);
-      })
-      .catch((error) => {
-        const errorCode = error.code;
-        const errorMessage = error.message;
-        Alert.alert(errorMessage);
+    if (!Email || !password) {
+      Alert.alert("Please fill in all fields");
+      return;
+    }
+    setLoading(true);
+    try {
+      const userCredential = await createUserWithEmailAndPassword(
+        auth,
+        Email,
+        password
+      );
+      const user = userCredential.user;
+
+      // Save user data to Firestore
+      const userRef = doc(db, "users", user.uid);
+      await setDoc(userRef, {
+        email: user.email,
+        uid: user.uid,
+        createdAt: new Date(),
       });
+
+      ToastAndroid.show("User Registered", ToastAndroid.BOTTOM);
+      setEmail("");
+      setPassword("");
+      router.push("/Signin");
+      console.log(user);
+    } catch (error) {
+      const errorMessage = error.message;
+      Alert.alert("Registration Error", errorMessage);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -68,9 +89,7 @@ export default function SignUp() {
             placeholder="Email Address"
             style={{ color: "gray" }}
             value={Email}
-            onChangeText={(value) => {
-              setEmail(value);
-            }}
+            onChangeText={(value) => setEmail(value)}
           />
         </View>
         <View style={styles.input}>
@@ -80,28 +99,28 @@ export default function SignUp() {
             style={{ color: "gray" }}
             secureTextEntry={true}
             value={password}
-            onChangeText={(value) => {
-              setPassword(value);
-            }}
+            onChangeText={(value) => setPassword(value)}
           />
         </View>
 
         <Pressable onPress={handleSignUp} style={styles.btn}>
-          <Text
-            style={{
-              textAlign: "center",
-              fontFamily: "outfit-bold",
-              color: "white",
-              fontSize: 20,
-            }}
-          >
-            Sign Up
-          </Text>
+          {loading ? (
+            <ActivityIndicator size="small" color="white" />
+          ) : (
+            <Text
+              style={{
+                textAlign: "center",
+                fontFamily: "outfit-bold",
+                color: "white",
+                fontSize: 20,
+              }}
+            >
+              Sign Up
+            </Text>
+          )}
         </Pressable>
         <Pressable
-          onPress={() => {
-            router.push("/Signin");
-          }}
+          onPress={() => router.push("/Signin")}
           style={{ flexDirection: "row", gap: 3 }}
         >
           <Text style={{ fontFamily: "outfit" }}>Already Have An Account?</Text>
