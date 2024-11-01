@@ -1,7 +1,45 @@
 import { StyleSheet, Text, View } from "react-native";
 import { Colors } from "../constants/Colors";
 import ChatList from "../components/Chatlist";
+import { onAuthStateChanged } from "firebase/auth";
+import { auth, userRef } from "../firebase/fireBaseConfig";
+import { getDocs, query, where } from "firebase/firestore";
+import { useEffect, useState } from "react";
+
 export default function Home() {
+  const [Data, setData] = useState();
+  const getUser = () => {
+    return new Promise((resolve, reject) => {
+      onAuthStateChanged(auth, (user) => {
+        if (user) {
+          resolve(user.uid);
+        } else {
+          reject("User not logged in");
+        }
+      });
+    });
+  };
+
+  const getUserData = async () => {
+    try {
+      const uid = await getUser(); // Wait for uid to be resolved
+      const q = query(userRef, where("uid", "!=", uid)); // Filter out the current user
+      const querySnapshot = await getDocs(q); // Retrieve the documents matching the query
+      const data = [];
+      querySnapshot.forEach((doc) => {
+        data.push({ ...doc.data() });
+      });
+
+      setData(data);
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  useEffect(() => {
+    getUserData();
+  }, []);
+
   return (
     <View>
       <View style={styles.header}>
@@ -20,10 +58,7 @@ export default function Home() {
           }}
         />
       </View>
-      <ChatList />
-      <ChatList />
-      <ChatList />
-      <ChatList />
+      <ChatList data={Data} />
     </View>
   );
 }

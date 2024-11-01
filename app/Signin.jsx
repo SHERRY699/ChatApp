@@ -31,7 +31,6 @@ export default function SignIn() {
         const user = userCredential.user;
         ToastAndroid.show("Login SuccessFull ", ToastAndroid.BOTTOM);
         router.push("/Home");
-        console.log(user);
         // ...
       })
       .catch((error) => {

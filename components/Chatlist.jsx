@@ -3,32 +3,49 @@ import {
   Text,
   View,
   TouchableOpacity,
-  ScrollView,
+  FlatList,
 } from "react-native";
+import { useRouter } from "expo-router";
 
-export default function ChatList() {
+const MessageBox = ({ item }) => {
+  const router = useRouter();
+  function handleMessage() {
+    router.push({ pathname: "/Message", params: item });
+  }
+
   return (
-    <ScrollView>
-      <TouchableOpacity style={styles.message}>
-        <View style={{ flexDirection: "row", gap: 4 }}>
-          <View
-            style={{
-              width: 40,
-              height: 40,
-              borderWidth: 2,
-              borderRadius: 30,
-              backgroundColor: "black",
-            }}
-          />
-          <View>
-            <Text style={{ fontFamily: "outfit", fontSize: 20 }}>Sherry</Text>
-            <Text style={{ color: "gray" }}>Message</Text>
-          </View>
+    <TouchableOpacity onPress={handleMessage} style={styles.message}>
+      <View style={{ flexDirection: "row", gap: 4 }}>
+        <View
+          style={{
+            width: 40,
+            height: 40,
+            borderWidth: 2,
+            borderRadius: 30,
+            backgroundColor: "black",
+          }}
+        />
+        <View>
+          <Text style={{ fontFamily: "outfit", fontSize: 20 }}>
+            {item?.username}
+          </Text>
+          <Text style={{ color: "gray" }}>Message</Text>
         </View>
+      </View>
 
-        <Text>Time</Text>
-      </TouchableOpacity>
-    </ScrollView>
+      <Text>Time</Text>
+    </TouchableOpacity>
+  );
+};
+
+export default function ChatList({ data }) {
+  return (
+    <FlatList
+      data={data}
+      renderItem={({ item }) => {
+        return <MessageBox item={item} />;
+      }}
+    />
   );
 }
 
